@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hexo_app/blocs/posts_bloc.dart';
-import 'package:hexo_app/data/web_api_client.dart';
+import 'package:hexo_app/data/web_api.dart';
 import 'package:hexo_app/repositories/post_repository.dart';
 import '../blocs/auth_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,13 +20,14 @@ class _HomePageState extends State<HomePage> {
   Completer<void> _completer;
   AuthBloc _authBloc;
   final _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
   @override
   void initState() {
     super.initState();
-    final client = WebApiClient(widget.credential);
+    final client = WebApi(widget.credential.url, widget.credential.token);
     final postRepository = PostRepository(client);
-    _postsBloc = PostsBloc(postRepository);
     _authBloc = BlocProvider.of<AuthBloc>(context);
+    _postsBloc = PostsBloc(postRepository, _authBloc);
     _postsBloc.dispatch(FetchPosts());
   }
 

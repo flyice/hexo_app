@@ -1,6 +1,6 @@
 import 'package:hexo_app/models/credentials.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../data/web_api_client.dart';
+import '../data/web_api.dart';
 import 'dart:convert';
 
 class AuthRepository {
@@ -11,7 +11,7 @@ class AuthRepository {
   AuthRepository(this.prefs);
 
   Future<String> auth(LoginCredential credential) {
-    return WebApiClient.auth(
+    return WebApi.auth(
         credential.url, credential.username, credential.password);
   }
 

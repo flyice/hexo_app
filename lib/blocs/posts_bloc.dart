@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hexo_app/models/Post.dart';
+import 'package:hexo_app/blocs/auth_bloc.dart';
+import 'package:hexo_app/models/post.dart';
 import 'package:hexo_app/repositories/post_repository.dart';
 
 abstract class PostsEvent extends Equatable {
@@ -37,7 +39,8 @@ class PostsLoaded extends PostsState {
 
 class PostsBloc extends Bloc<PostsEvent, PostsState> {
   final PostRepository postRepository;
-  PostsBloc(this.postRepository);
+  final AuthBloc authBloc;
+  PostsBloc(this.postRepository, this.authBloc);
   @override
   PostsState get initialState => PostsUninitialized();
 
@@ -48,6 +51,13 @@ class PostsBloc extends Bloc<PostsEvent, PostsState> {
         final posts = await postRepository.getPosts();
         yield PostsLoaded(posts);
       } catch (e) {
+        if (e is DioError) {
+          if (e.response != null) {
+            if (e.response.statusCode == 401) {
+              authBloc.dispatch(LoggedOut());
+            }
+          }
+        }
         yield PostsError(e.toString());
       } finally {
         event.callback ?? event.callback();

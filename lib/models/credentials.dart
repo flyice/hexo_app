@@ -3,7 +3,7 @@ import 'dart:convert';
 class LoginCredential {
   String url = '', username = '', password = '';
 
-  LoginCredential([this.url, this.username, this.password]);
+  LoginCredential({this.url, this.username, this.password});
 
   LoginCredential.fromJson(Map<String, dynamic> json)
       : url = json['url'],

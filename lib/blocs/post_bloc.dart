@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:bloc/bloc.dart';
 import '../repositories/post_repository.dart';
-import '../models/Post.dart';
+import '../models/post.dart';
 
 class PostEvent extends Equatable {
   PostEvent([List props = const []]) : super(props);
@@ -10,8 +10,9 @@ class PostEvent extends Equatable {
 }
 
 class FetchPost extends PostEvent {
-  final String id;
-  FetchPost(this.id) : super([id]);
+  final String slug;
+  final bool published;
+  FetchPost(this.slug, this.published) : super([slug, published]);
 }
 
 class PostState extends Equatable {
@@ -42,7 +43,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   Stream<PostState> mapEventToState(PostEvent event) async* {
     if (event is FetchPost) {
       try {
-        final post = await postRepository.getPost(event.id);
+        final post = await postRepository.getPost(event.slug, event.published);
         yield PostLoaded(post);
       } catch (e) {
         yield PostError(e.toString());

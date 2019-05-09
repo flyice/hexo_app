@@ -59,12 +59,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       try {
         final credential = event.credential;
-
         final token = await authRepository.auth(credential);
+
         authRepository.persistLoginCredential(credential);
+
         authBloc.dispatch(LoggedIn(credential, token));
-      } on DioError catch (e) {
-        final message = _handleDioError(e);
+      } catch (e) {
+        var message = e.toString();
+        if (e is DioError) {
+          message = _handleDioError(e);
+        }
         yield LoginError(error: message);
       }
     }
@@ -72,13 +76,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   String _handleDioError(DioError e) {
     if (e.response != null) {
-      if (e.response.statusCode == 401 || e.response.statusCode == 400) {
+      if (e.response.statusCode == 401) {
         return 'Authenticate failed, please check username and password';
       }
       if (e.response.statusCode == 404) {
         return 'Invalid URL, please check it';
       }
     }
-    return 'Network error';
+    return 'Please check network connection';
   }
 }

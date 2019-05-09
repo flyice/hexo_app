@@ -1,15 +1,15 @@
-import 'package:hexo_app/data/web_api_client.dart';
-import 'package:hexo_app/models/Post.dart';
+import 'package:hexo_app/data/web_api.dart';
+import 'package:hexo_app/models/post.dart';
 
 class PostRepository {
-  final WebApiClient client;
-  PostRepository(this.client);
+  final WebApi api;
+  PostRepository(this.api);
 
   Future<List<Post>> getPosts() {
-    return client.getPosts();
+    return api.getPosts();
   }
 
-  Future<Post> getPost(String id) {
-    return client.getPost(id);
+  Future<Post> getPost(String slug, bool published) {
+    return api.getPost(slug, published);
   }
 }
