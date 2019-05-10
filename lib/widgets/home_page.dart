@@ -28,7 +28,6 @@ class _HomePageState extends State<HomePage> {
     final postRepository = PostRepository(client);
     _authBloc = BlocProvider.of<AuthBloc>(context);
     _postsBloc = PostsBloc(postRepository, _authBloc);
-    _postsBloc.dispatch(FetchPosts());
   }
 
   @override
@@ -67,31 +66,30 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        body: BlocBuilder(
-          bloc: _postsBloc,
-          builder: (_, PostsState state) {
-            if (state is PostsUninitialized) {
-              _postsBloc.dispatch(FetchPosts());
-              return Center(
-                heightFactor: 1,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 40),
-                  child: RefreshProgressIndicator(),
-                ),
-              );
-            }
-
-            if (state is PostsError) {
-              return _buildRetry("can't fetch posts");
-            }
-
-            if (state is PostsLoaded) {
-              if (state.posts.isEmpty) {
-                return _buildRetry('no posts');
+        body: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          key: _refreshIndicatorKey,
+          child: BlocBuilder(
+            bloc: _postsBloc,
+            builder: (_, PostsState state) {
+              if (state is PostsUninitialized) {
+                _refreshIndicatorKey.currentState.show();
+                return Container();
               }
-              return RefreshIndicator(
-                onRefresh: _handleRefresh,
-                child: ListView.builder(
+
+              if (state is PostsError) {
+                return Center(
+                  child: Text("can't fetch post"),
+                );
+              }
+
+              if (state is PostsLoaded) {
+                if (state.posts.isEmpty) {
+                  return Center(
+                    child: Text("no posts"),
+                  );
+                }
+                return ListView.builder(
                   itemCount: state.posts.length,
                   itemBuilder: (_, index) {
                     final post = state.posts[index];
@@ -101,10 +99,10 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {},
                     );
                   },
-                ),
-              );
-            }
-          },
+                );
+              }
+            },
+          ),
         ));
   }
 
